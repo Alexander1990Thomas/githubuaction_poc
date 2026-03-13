@@ -3,45 +3,45 @@ name: Fullstack CI
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
 
-  build-backend:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+
+      - name: Checkout code
         uses: actions/checkout@v4
 
+      # Build Backend
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
       - name: Build Spring Boot
         working-directory: backend
-        run: mvn clean install -DskipTests
+        run: mvn clean package -DskipTests
 
-
-  build-frontend:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
+      # Build Angular
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: 18
 
-      - name: Install Dependencies
+      - name: Install dependencies
         working-directory: frontend
         run: npm install
 
       - name: Build Angular
         working-directory: frontend
         run: npm run build
+
+      # Build Docker Images
+      - name: Build Backend Docker Image
+        run: docker build -t backend-app ./backend
+
+      - name: Build Frontend Docker Image
+        run: docker build -t frontend-app ./frontend
