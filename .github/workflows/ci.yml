@@ -1,47 +1,40 @@
-name: Fullstack CI
+name: Build and Push Images
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Build Backend
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - name: Azure Login
+        uses: azure/login@v2
         with:
-          distribution: temurin
-          java-version: 17
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Build Spring Boot
+      - name: Login to ACR
+        run: az acr login --name alexacr1234
+
+      # Build Spring Boot jar
+      - name: Build backend
         working-directory: backend
         run: mvn clean package -DskipTests
 
-      # Build Angular
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+      # Build Docker images
+      - name: Build backend image
+        run: docker build -t alexacr1234.azurecr.io/backend-app-githubaction:latest ./backend
 
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm install
+      - name: Build frontend image
+        run: docker build -t alexacr1234.azurecr.io/frontend-app-githubaction:latest ./frontend
 
-      - name: Build Angular
-        working-directory: frontend
-        run: npm run build
+      # Push images
+      - name: Push backend image
+        run: docker push <your-acr-name>.azurecr.io/backend-app-githubaction:latest
 
-      # Build Docker Images
-      - name: Build Backend Docker Image
-        run: docker build -t backend-app ./backend
-
-      - name: Build Frontend Docker Image
-        run: docker build -t frontend-app ./frontend
+      - name: Push frontend image
+        run: docker push <your-acr-name>.azurecr.io/frontend-app-githubaction:latest
