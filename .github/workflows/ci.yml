@@ -34,7 +34,7 @@ jobs:
 
       # Push images
       - name: Push backend image
-        run: docker push <your-acr-name>.azurecr.io/backend-app-githubaction:latest
+        run: docker push alexacr1234.azurecr.io/backend-app-githubaction:latest
 
       - name: Push frontend image
-        run: docker push <your-acr-name>.azurecr.io/frontend-app-githubaction:latest
+        run: docker push alexacr1234.azurecr.io/frontend-app-githubaction:latest
